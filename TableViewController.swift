@@ -20,12 +20,8 @@ class TableViewController: UITableViewController {
         super.viewDidLoad()
         
         //Navigation button to edit cells
-        
         navigationItem.rightBarButtonItem = editButtonItem()
-        
-        //Add new item to table
-        
-        tableView.allowsSelectionDuringEditing = true
+
         
         //This iterates through all of the images using the DataItem class. Adds them to the items array.
         
@@ -51,15 +47,11 @@ class TableViewController: UITableViewController {
         allItems.append(items)
         allItems.append(otherItems)
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        
+        //Add new item to table
+        tableView.allowsSelectionDuringEditing = true
+        
     }
-    
-    //Allows view to enter editing mode 
-    
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -193,7 +185,7 @@ class TableViewController: UITableViewController {
             
             for (index, sectionItems) in allItems.enumerate() {
                 let indexPath = NSIndexPath(forRow: sectionItems.count, inSection: index)
-                tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
                 
             }
             tableView.endUpdates()

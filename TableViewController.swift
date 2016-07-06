@@ -140,21 +140,7 @@ class TableViewController: UITableViewController {
     
     
 
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
+  
     /*
     // MARK: - Navigation
 
@@ -211,6 +197,46 @@ class TableViewController: UITableViewController {
             
         }
         
+    }
+    
+    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        let sectionItems = allItems[indexPath.section]
+        if indexPath.row >= sectionItems.count && editing {
+            return false
+        }
+        
+        return true
+        
+    }
+    
+    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
+        var fromSectionItems = allItems[fromIndexPath.section]
+        var toSectionItems = allItems[toIndexPath.section]
+        let itemToMove = fromSectionItems[fromIndexPath.row]
+        
+        if fromIndexPath.section == toIndexPath.section {
+            if toIndexPath.row != fromIndexPath.row {
+                
+                swap(&toSectionItems[toIndexPath.row], &toSectionItems[fromIndexPath.row])
+            }
+        } else {
+            
+            toSectionItems.insert(itemToMove, atIndex: toIndexPath.row)
+            fromSectionItems.removeAtIndex(fromIndexPath.row)
+        }
+        
+        
+    }
+    
+    override func tableView(tableView: UITableView, targetIndexPathForMoveFromRowAtIndexPath sourceIndexPath: NSIndexPath, toProposedIndexPath proposedDestinationIndexPath: NSIndexPath) -> NSIndexPath {
+        
+        let sectionItems = allItems[proposedDestinationIndexPath.section]
+        if proposedDestinationIndexPath.row >= sectionItems.count {
+            
+            return NSIndexPath(forItem: sectionItems.count - 1, inSection: proposedDestinationIndexPath.section)
+        }
+        
+        return proposedDestinationIndexPath
     }
 
 }

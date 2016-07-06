@@ -19,6 +19,14 @@ class TableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //Navigation button to edit cells
+        
+        navigationItem.rightBarButtonItem = editButtonItem()
+        
+        //Add new item to table
+        
+        tableView.allowsSelectionDuringEditing = true
+        
         //This iterates through all of the images using the DataItem class. Adds them to the items array.
         
         for i in 1...12{
@@ -49,7 +57,10 @@ class TableViewController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
-
+    
+    //Allows view to enter editing mode 
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -58,38 +69,44 @@ class TableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
         return allItems.count
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return allItems[section].count
+       
+        let addedRow = editing ? 1 : 0
+        
+        return allItems[section].count + addedRow
     }
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
         
+        //If there are more rows(because of adding edited row) then it generates a label for that new row
+        if indexPath.row >= allItems[indexPath.section].count && editing {
+            cell.textLabel?.text = "Add New Item"
+            cell.detailTextLabel?.text = nil
+            cell.imageView?.image = nil
+            
+        } else {
+        
         let item = allItems[indexPath.section][indexPath.row]
         
         cell.textLabel?.text = item.title
-        
         cell.detailTextLabel?.text = item.subtitle
-        
+    
         if let imageView = cell.imageView, itemImage = item.image {
             imageView.image = itemImage
             
         } else {
-            
             cell.imageView?.image = nil
-            
+            }
         }
-
-       
         return cell
     }
     
+   
    
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return "Section #\(section)"
@@ -102,18 +119,34 @@ class TableViewController: UITableViewController {
         return true
     }
     */
+    
+    //Checking to see if editing or deleting row
+    
+    override func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
+        let sectionItems = allItems[indexPath.section]
+        
+        if indexPath.row >= sectionItems.count {
+            return .Insert
+        } else {
+            return .Delete
+        }
+    }
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            // Delete the row from the data source
+            allItems[indexPath.section].removeAtIndex(indexPath.row)
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+            let newData = DataItem(title: "New Item", subtitle: "", imageName: nil)
+            allItems[indexPath.section].append(newData)
+            tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            
+        }
     }
-    */
+    
+    
 
     /*
     // Override to support rearranging the table view.
@@ -139,5 +172,53 @@ class TableViewController: UITableViewController {
         // Pass the selected object to the new view controller.
     }
     */
+
+    override func setEditing(editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        
+        if editing {
+            tableView.beginUpdates()
+            
+            for (index, sectionItems) in allItems.enumerate() {
+                let indexPath = NSIndexPath(forRow: sectionItems.count, inSection: index)
+                tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            }
+            
+            tableView.endUpdates()
+            tableView.setEditing(true, animated: true)
+            
+        } else {
+            
+            tableView.beginUpdates()
+            
+            for (index, sectionItems) in allItems.enumerate() {
+                let indexPath = NSIndexPath(forRow: sectionItems.count, inSection: index)
+                tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                
+            }
+            tableView.endUpdates()
+            tableView.setEditing(false, animated: true)
+            
+        }
+        
+    }
+    
+    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        let sectionItems = allItems[indexPath.section]
+        if editing && indexPath.row < sectionItems.count {
+            return nil
+        }
+        return indexPath
+    }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        let sectionItems = allItems[indexPath.section]
+        if indexPath.row >= sectionItems.count && editing {
+            self.tableView(tableView, commitEditingStyle: .Insert, forRowAtIndexPath: indexPath)
+            
+        }
+        
+    }
 
 }
